@@ -29,7 +29,7 @@
 ### **AI & Automation Tools**
 <p align="left">
   <img src="https://skillicons.dev/icons?i=openai,docker,github,postman,n8n" />
-  <img height="48" src="https://lobehub.com/icons/n8n" alt="n8n"/>
+  <img height="48" src="https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/n8n-color.png" alt="n8n"/>
 </p>
 
 ### **Other Tools**
