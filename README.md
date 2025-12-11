@@ -26,14 +26,9 @@
 
 ## 🚀 Tech Stack
 
-### **Languages & Frameworks**
-<p align="left">
-  <img src="https://skillicons.dev/icons?i=python,fastapi,bash,js" />
-</p>
-
 ### **AI & Automation Tools**
 <p align="left">
-  <img src="https://skillicons.dev/icons?i=openai,docker,github,postman" />
+  <img src="https://skillicons.dev/icons?i=openai,docker,github,postman,n8n" />
   <img height="48" src="https://lobehub.com/icons/n8n" alt="n8n"/>
 </p>
 
