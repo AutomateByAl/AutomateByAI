@@ -34,7 +34,7 @@
 ### **AI & Automation Tools**
 <p align="left">
   <img src="https://skillicons.dev/icons?i=openai,docker,github,postman" />
-  <img height="48" src="https://n8n.io/logo.svg" alt="n8n"/>
+  <img height="48" src="https://lobehub.com/icons/n8n" alt="n8n"/>
 </p>
 
 ### **Other Tools**
