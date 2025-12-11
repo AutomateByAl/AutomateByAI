@@ -1,6 +1,6 @@
 <!-- HEADER BANNER -->
 <div align="center">
-  <img src="https://avatars.githubusercontent.com/u/150607056?v=4" width="100%" alt="AutomateByAI Banner"/>
+  <img src="https://avatars.githubusercontent.com/u/150607056?v=4" width="30%" alt="AutomateByAI Banner"/>
 </div>
 
 <br>
