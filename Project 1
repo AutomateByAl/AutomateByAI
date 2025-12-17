@@ -1,1 +1,347 @@
-
+{
+  "name": "Поиск фото с диска по дате",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "5f5158b6-8336-4301-bd91-66ebff3116fe",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1,
+      "position": [
+        -336,
+        -96
+      ],
+      "webhookId": "your-webhook-id",
+      "credentials": {
+        "telegramApi": {
+          "id": "38zHnJMf8uwPNKum",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "functionCode": "// Получаем текст сообщения\nconst message = $input.item.json.message.text;\nconst chatId = $input.item.json.message.chat.id;\n\n// Парсим дату (формат: \"день месяц год\" или \"ДД.ММ.ГГГГ\")\nlet day, month, year;\n\n// Пробуем разные форматы\nif (message.includes('.')) {\n  const parts = message.split('.');\n  day = parts[0];\n  month = parts[1];\n  year = parts[2];\n} else if (message.includes(' ')) {\n  const parts = message.trim().split(' ');\n  day = parts[0];\n  month = parts[1];\n  year = parts[2];\n} else if (message.includes('/')) {\n  const parts = message.split('/');\n  day = parts[0];\n  month = parts[1];\n  year = parts[2];\n}\n\n// Проверяем валидность\nif (!day || !month || !year) {\n  return [{\n    json: {\n      chatId: chatId,\n      error: true,\n      errorMessage: 'Пожалуйста, введите дату в формате: ДД.ММ.ГГГГ или ДД ММ ГГГГ'\n    }\n  }];\n}\n\n// Форматируем дату для поиска\nconst formattedDate = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;\nconst searchQuery = `${year}_${month.padStart(2, '0')}_${day.padStart(2, '0')}`;\n\nreturn [{\n  json: {\n    chatId: chatId,\n    originalMessage: message,\n    day: day,\n    month: month,\n    year: year,\n    formattedDate: formattedDate,\n    searchQuery: searchQuery,\n    error: false\n  }\n}];"
+      },
+      "id": "018fb878-47e1-44e9-89ad-551e4cf522fd",
+      "name": "Parse Date",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.error }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "24d427bb-a0e3-4b21-b989-8295d7ec0f14",
+      "name": "Check Error",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        80,
+        -112
+      ]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.errorMessage }}",
+        "additionalFields": {}
+      },
+      "id": "8b0f7a3c-d3d7-4810-a5e9-db7616f1cb8a",
+      "name": "Send Error Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        288,
+        -192
+      ],
+      "webhookId": "d9d7588b-df24-4d48-a83d-f54d82b43eb4",
+      "credentials": {
+        "telegramApi": {
+          "id": "38zHnJMf8uwPNKum",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $input.all().length }}",
+              "operation": "larger"
+            }
+          ]
+        }
+      },
+      "id": "942e9c01-73df-48d3-b66d-79b5ff7e19d6",
+      "name": "Check Photo Found",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendPhoto",
+        "chatId": "={{ $json.chatId }}",
+        "binaryData": true,
+        "additionalFields": {
+          "caption": "Фото за {{ $node['Parse Date'].json.day }}.{{ $node['Parse Date'].json.month }}.{{ $node['Parse Date'].json.year }}"
+        }
+      },
+      "id": "b3b94ea4-0fe5-416e-bd83-76de58331b6e",
+      "name": "Send Photo",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -112
+      ],
+      "webhookId": "ad5dc7b4-74bf-4e9b-8d03-9c642886f65c",
+      "credentials": {
+        "telegramApi": {
+          "id": "38zHnJMf8uwPNKum",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $node['Parse Date'].json.chatId }}",
+        "text": "Фото за дату {{ $node['Parse Date'].json.day }}.{{ $node['Parse Date'].json.month }}.{{ $node['Parse Date'].json.year }} не найдено. Проверьте правильность даты.",
+        "additionalFields": {}
+      },
+      "id": "ace7b57e-b465-45f0-9b7d-e1c4a11ffd6b",
+      "name": "Send Not Found Message",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [
+        704,
+        112
+      ],
+      "webhookId": "0e7e64e8-a0f5-4b43-827f-c92bbf3d019f",
+      "credentials": {
+        "telegramApi": {
+          "id": "38zHnJMf8uwPNKum",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://www.googleapis.com/drive/v3/files",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "=modifiedTime >= '{{ $json.formattedDate }}T00:00:00' and modifiedTime <= '{{ $json.formattedDate }}T23:59:59' and mimeType contains 'image/'"
+            },
+            {
+              "name": "fields",
+              "value": "files(id, name, mimeType)"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        288,
+        -16
+      ],
+      "id": "5004831f-230c-46a1-848c-cf56ac4b2b2e",
+      "name": "HTTP Request",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VtS3n0xueyUB166H",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://www.googleapis.com/drive/v3/files/{{ $json.fileId }}?alt=media",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        880,
+        -112
+      ],
+      "id": "d4c082b4-afbe-4a4b-8b8b-621796ac750a",
+      "name": "HTTP Request1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "VtS3n0xueyUB166H",
+          "name": "Google Drive account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Получаем все файлы из результатов поиска\nconst files = $input.item.json.files;\nconst chatId = $node[\"Parse Date\"].json.chatId;\n\nif (files && files.length > 0) {\n  // Возвращаем ВСЕ файлы, а не только первый\n  return files.map(file => ({\n    json: {\n      fileId: file.id,\n      fileName: file.name,\n      chatId: chatId\n    }\n  }));\n}\n\nreturn [];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        704,
+        -112
+      ],
+      "id": "60483f54-16f6-472d-9aa7-1451f43e2b55",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "content": "Search photo by date in Google drive",
+        "height": 624,
+        "width": 1616
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -304
+      ],
+      "id": "b4eb0a13-db3e-4279-b448-9f1ca1e3c08e",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse Date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Date": {
+      "main": [
+        [
+          {
+            "node": "Check Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Error": {
+      "main": [
+        [
+          {
+            "node": "Send Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Photo Found": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Not Found Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Check Photo Found",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Send Photo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2fce4044-4e93-42a7-8ff9-745f813fa9c2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "750e3fafe19a008aef8038869789f5edae08eb1fbc0eb43428dcf675c2fa985f"
+  },
+  "id": "WEairKE5UH5KnYzL",
+  "tags": []
+}
